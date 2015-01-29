@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import sys
 import subprocess
 import threading
@@ -21,8 +22,10 @@ class AudioPlayer:
     if sys.platform == "linux" or sys.platform == "linux2":
       raise RuntimeError("AudioPlayer hasn't been implemented on linux yet")
       self.player_cmd = ""
+      self.audio_extensions = []
     elif sys.platform == "darwin":
       self.player_cmd = "afplay"
+      self.audio_extensions = [re.compile(".*\.mp3"), re.compile(".*\.wav")]
 
   def play(self, track):
     self.stop()
@@ -45,14 +48,12 @@ class AudioPlayer:
 
 class Player():
 
-  audio_extensions = ["mp3", "ogg", "wav"]
-
   def __init__(self, working_directory):
+    self.audio_player = AudioPlayer(self)
     self.working_directory = working_directory
     self.tracks = []
     self.__add_dir(working_directory)
     self.current_track = None
-    self.audio_player = AudioPlayer(self)
 
   def play(self):
     if not self.tracks:
@@ -108,7 +109,10 @@ class Player():
   def __add_dir(self, dirname):
     for dirname, dirnames, filenames in os.walk(self.working_directory):
       for f in filenames:
-        self.tracks.append(Track(dirname, f))
+        for ext in self.audio_player.audio_extensions:
+          if ext.match(f):
+            self.tracks.append(Track(dirname, f))
+            break
 
 def main():
   if len(sys.argv) > 1:
