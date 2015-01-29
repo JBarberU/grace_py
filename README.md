@@ -31,5 +31,3 @@ grace.py was named after my cat, who in turn was named after Grace Hopper.
 
 See [LICENSE](LICENSE.md)
 
-#!/bin/bash
-
